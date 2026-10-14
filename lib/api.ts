@@ -1,4 +1,4 @@
-import type { Vaga, Empresa } from "@/lib/tipos";
+import type { Vaga, Empresa, Candidatura } from "@/lib/tipos";
 import { prisma } from "@/lib/prisma";
 
 const FONTE =
@@ -8,6 +8,8 @@ const FONTE =
 const CACHE_VAGAS = { next: { revalidate: 60, tags: ["vagas"] } };
 
 const CACHE_EMPRESAS = { next: { revalidate: 3600, tags: ["empresas"] } };
+
+const candidaturas: Candidatura[] = [];
 
 async function buscarVagasPublicadas(): Promise<Vaga[]> {
   const resposta = await fetch(`${FONTE}/vagas.json`, CACHE_VAGAS);
@@ -76,4 +78,7 @@ export async function listarEmpresas(): Promise<Empresa[]> {
 export async function buscarEmpresa(slug: string): Promise<Empresa | undefined> {
   const empresas = await listarEmpresas();
   return empresas.find((empresa) => empresa.slug === slug);
+}
+export function guardarCandidatura(candidatura: Candidatura) {
+  candidaturas.push(candidatura);
 }
