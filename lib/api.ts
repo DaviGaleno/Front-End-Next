@@ -74,6 +74,9 @@ export async function listarEmpresas(): Promise<Empresa[]> {
 }
 
 export async function buscarEmpresa(slug: string): Promise<Empresa | undefined> {
-  const empresas = await listarEmpresas();
-  return empresas.find((empresa) => empresa.slug === slug);
+  const editada = await prisma.empresa.findUnique({ where: { slug } });
+  if (editada) return editada;
+
+  const publicadas = await listarEmpresas();
+  return publicadas.find((empresa) => empresa.slug === slug);
 }
