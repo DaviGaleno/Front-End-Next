@@ -4,12 +4,16 @@ import { prisma } from "@/lib/prisma";
 const FONTE =
   "https://raw.githubusercontent.com/Um-Leque-de-Tecnologia/lequedevagas-web/main/dados";
 
+const criadas: Vaga[] = [];
+const arquivadas = new Set<string>();
+const candidaturas: Candidatura[] = [];
+const editadas = new Map<string, Empresa>();
+
 
 const CACHE_VAGAS = { next: { revalidate: 60, tags: ["vagas"] } };
 
 const CACHE_EMPRESAS = { next: { revalidate: 3600, tags: ["empresas"] } };
 
-const candidaturas: Candidatura[] = [];
 
 async function buscarVagasPublicadas(): Promise<Vaga[]> {
   const resposta = await fetch(`${FONTE}/vagas.json`, CACHE_VAGAS);
@@ -75,10 +79,14 @@ export async function listarEmpresas(): Promise<Empresa[]> {
   return resposta.json();
 }
 
-export async function buscarEmpresa(slug: string): Promise<Empresa | undefined> {
-  const empresas = await listarEmpresas();
-  return empresas.find((empresa) => empresa.slug === slug);
+export function guardarVaga(vaga: Vaga) {
+  criadas.unshift(vaga);
 }
-export function guardarCandidatura(candidatura: Candidatura) {
-  candidaturas.push(candidatura);
+
+export async function buscarEmpresa(slug: string): Promise<Empresa | undefined> {
+  const editada = await prisma.empresa.findUnique({ where: { slug } });
+  if (editada) return editada;
+
+  const publicadas = await listarEmpresas();
+  return publicadas.find((empresa) => empresa.slug === slug);
 }
