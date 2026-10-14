@@ -6,6 +6,7 @@ import { listarVagas, buscarVaga } from "@/lib/api";
 import BotaoCopiarLink from "@/components/BotaoCopiarLink";
 import DescricaoDaVaga from "@/components/DescricaoDaVaga";
 import FormularioDeCandidatura from "@/components/FormularioDeCandidatura";
+import { prisma } from "@/lib/prisma";
 
 type Props = { params: Promise<{ id: string }> };
 
@@ -17,6 +18,7 @@ export async function generateStaticParams() {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { id } = await params;
   const vaga = await buscarVaga(id);
+  const total = await prisma.candidatura.count({ where: { vagaId: id } });
 
   if (!vaga) return { title: "Vaga não encontrada · Leque de Vagas" };
 

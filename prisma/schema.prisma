@@ -3,10 +3,11 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "sqlite"          // um arquivo no projeto: zero serviço para subir
   url      = env("DATABASE_URL")
 }
 
+// ─── frente 1 ───────────────────────────────────────────────
 model Vaga {
   id              String   @id @default(uuid())
   titulo          String
@@ -17,6 +18,30 @@ model Vaga {
   local           String
   aceitaIniciante Boolean  @default(false)
   descricao       String
-  criadaEm        DateTime @default(now())
+  criadaEm        DateTime @default(now())   // o banco carimba; ninguém manda
+
+  // frente 4
   arquivada       Boolean  @default(false)
+
+  // frente 3 — o outro lado da relação
+  candidaturas    Candidatura[]
+}
+
+// ─── frente 2 ───────────────────────────────────────────────
+model Empresa {
+  slug      String   @id          // o slug É a chave: é o que vai na URL
+  nome      String
+  sobre     String
+  site      String
+  editadaEm DateTime @updatedAt   // o banco atualiza a cada gravação
+}
+
+// ─── frente 3 ───────────────────────────────────────────────
+model Candidatura {
+  id       String   @id @default(uuid())
+  nome     String
+  email    String
+  vagaId   String
+  vaga     Vaga     @relation(fields: [vagaId], references: [id])
+  criadaEm DateTime @default(now())
 }
