@@ -1,13 +1,19 @@
-import type { Vaga, Empresa } from "@/lib/tipos";
+import type { Vaga, Empresa, Candidatura } from "@/lib/tipos";
 import { prisma } from "@/lib/prisma";
 
 const FONTE =
   "https://raw.githubusercontent.com/Um-Leque-de-Tecnologia/lequedevagas-web/main/dados";
 
+const criadas: Vaga[] = [];
+const arquivadas = new Set<string>();
+const candidaturas: Candidatura[] = [];
+const editadas = new Map<string, Empresa>();
+
 
 const CACHE_VAGAS = { next: { revalidate: 60, tags: ["vagas"] } };
 
 const CACHE_EMPRESAS = { next: { revalidate: 3600, tags: ["empresas"] } };
+
 
 async function buscarVagasPublicadas(): Promise<Vaga[]> {
   const resposta = await fetch(`${FONTE}/vagas.json`, CACHE_VAGAS);
@@ -71,6 +77,10 @@ export async function listarEmpresas(): Promise<Empresa[]> {
     throw new Error(`empresas.json respondeu ${resposta.status}`);
   }
   return resposta.json();
+}
+
+export function guardarVaga(vaga: Vaga) {
+  criadas.unshift(vaga);
 }
 
 export async function buscarEmpresa(slug: string): Promise<Empresa | undefined> {
